@@ -1,4 +1,4 @@
-import { ResolverFn } from 'apollo-server';
+import { ResolverFn } from 'apollo-server-express';
 import * as fs from 'fs';
 import * as path from 'path';
 

@@ -10,7 +10,7 @@
 /dist
 
 # keys
-/src/keys
+*.pem
 
 # misc
 .DS_Store

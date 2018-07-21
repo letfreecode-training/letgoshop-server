@@ -62,22 +62,38 @@ const RegisterRouter = (routers: Router) => {
     } else {
       const { name, email, password }: RegisterType = body;
       connectAndQueryMongo(() => {
-        const hashPassword = createHashPassword(password);
+        UserModel.findOne(
+          {
+            email
+          },
+          (err, register) => {
+            if (!register) {
+              const hashPassword = createHashPassword(password);
 
-        let user = new UserModel({
-          name,
-          email,
-          password: hashPassword
-        });
+              let user = new UserModel({
+                name,
+                email,
+                password: hashPassword
+              });
 
-        user.save().then(() => {
-          res.status(200).send({
-            statusCode: 200,
-            data: {
-              message: 'create user success'
+              user.save().then(() => {
+                res.status(200).send({
+                  statusCode: 200,
+                  data: {
+                    message: 'create user success'
+                  }
+                });
+              });
+            } else {
+              res.status(200).send({
+                statusCode: 200,
+                error: {
+                  errors: ['重複註冊']
+                }
+              });
             }
-          });
-        });
+          }
+        );
       });
     }
   });

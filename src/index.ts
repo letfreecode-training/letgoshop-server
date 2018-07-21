@@ -1,6 +1,7 @@
 /** Graphql Server */
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
 import { ApolloServer, gql } from 'apollo-server-express';
 
 /** Graphql Server Type and Resolver */
@@ -18,7 +19,7 @@ const app = express();
 const routers = express.Router();
 
 app.use(bodyParser.json());
-app.use('/api', RegisterRouter(routers));
+app.use('/api', cors(), RegisterRouter(routers));
 
 server.applyMiddleware({ app });
 

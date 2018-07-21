@@ -1,7 +1,14 @@
 import { Router, Request, Response } from 'express';
 import * as mongoose from 'mongoose';
 import * as Ajv from 'ajv';
+import { createHmac } from 'crypto';
 var ajv = new Ajv();
+
+type RegisterType = {
+  name: string;
+  email: string;
+  password: string;
+};
 
 const registerSchema = {
   properties: {
@@ -16,6 +23,21 @@ const registerSchema = {
     }
   },
   required: ['name', 'email', 'password']
+};
+
+const createHashPassword = (password: string) =>
+  createHmac('sha256', '__secret')
+    .update(password)
+    .digest('hex');
+
+const connectAndQueryMongo = (query: Function) => {
+  mongoose.connect(
+    'mongodb://127.0.0.1:27017/letgoshop',
+    { useNewUrlParser: true },
+    () => {
+      query();
+    }
+  );
 };
 
 const UserSchema = new mongoose.Schema({
@@ -38,28 +60,25 @@ const RegisterRouter = (routers: Router) => {
         }
       });
     } else {
-      const { name, email, password } = body;
-      mongoose.connect(
-        'mongodb://127.0.0.1:27017/letgoshop',
-        { useNewUrlParser: true },
-        () => {
-          let user = new UserModel({
-            name,
-            email,
-            password
+      const { name, email, password }: RegisterType = body;
+      connectAndQueryMongo(() => {
+        const hashPassword = createHashPassword(password);
+
+        let user = new UserModel({
+          name,
+          email,
+          password: hashPassword
+        });
+
+        user.save().then(() => {
+          res.status(200).send({
+            statusCode: 200,
+            data: {
+              message: 'create user success'
+            }
           });
-          user.save().then(() => {
-            res.status(200).send({
-              statusCode: 200,
-              data: {
-                message: 'create user success'
-              }
-            });
-            mongoose.disconnect();
-          });
-        }
-      );
-      // mongoose.disconnect();
+        });
+      });
     }
   });
 

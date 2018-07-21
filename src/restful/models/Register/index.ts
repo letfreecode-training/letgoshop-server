@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import * as Ajv from 'ajv';
 import { createHmac } from 'crypto';
 import * as mongoose from 'mongoose';
+import { UserSchema } from '../../../modules/mongodb/schema/User';
 
 const ajv = new Ajv();
 
@@ -18,11 +19,6 @@ const createHashPassword = (password: string) =>
     .update(password)
     .digest('hex');
 
-const UserSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String
-});
 const UserModel = mongoose.model('User', UserSchema);
 
 const RegisterRouter = (routers: Router) => {

@@ -2,6 +2,12 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
+
+/** redis */
+import { createRedisClient } from './modules/redis';
+
+/** apollo server */
+
 import { ApolloServer, gql } from 'apollo-server-express';
 
 /** Graphql Server Type and Resolver */
@@ -22,12 +28,21 @@ createMongoConnection({
   useNewUrlParser: true,
   poolSize: 5
 });
+const redisClient = createRedisClient();
 
 const app = express();
 const routers = express.Router();
 
 app.use(bodyParser.json());
-app.use('/api', cors(), RegisterRouter(routers), LoginRouter(routers));
+app.use(
+  '/api',
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }),
+  RegisterRouter(routers),
+  LoginRouter(routers, redisClient)
+);
 
 server.applyMiddleware({ app });
 

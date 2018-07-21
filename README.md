@@ -12,4 +12,12 @@
 - docker-compose
   - mongodb 完成
   - redis 完成
-- Register 部分完成
+- Register 完成
+
+## 2018-07-22
+
+- Login 完成
+  - jwt token
+  - Set Cookie(httpOnly)
+  - with credental
+  - redis 儲存

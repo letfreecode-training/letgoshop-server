@@ -19,6 +19,28 @@ const createHashPassword = (password: string) =>
     .update(password)
     .digest('hex');
 
+const createJWTToken = (data: { name: string; email: string }): string =>
+  jwt.sign(
+    {
+      name: data.name,
+      email: data.email
+    },
+    cert,
+    { algorithm: 'RS256' }
+  );
+
+const insertRedis = (redisClient: RedisClient, key: string, data: object) => {
+  return new Promise((resolve, reject) => {
+    redisClient.set(key, JSON.stringify(data), 'EX', 3600, done => {
+      if (!done) {
+        resolve();
+      } else {
+        reject(done);
+      }
+    });
+  });
+};
+
 const UserModel = mongoose.model('User', UserSchema);
 
 const LoginRouter = (routers: Router, redisClient: RedisClient) => {
@@ -50,23 +72,8 @@ const LoginRouter = (routers: Router, redisClient: RedisClient) => {
               }
             });
           } else {
-            var token = jwt.sign(
-              {
-                name: user.name,
-                email: user.email
-              },
-              cert,
-              { algorithm: 'RS256' }
-            );
-            redisClient.set(
-              token,
-              JSON.stringify({
-                name: user.name,
-                email: user.email
-              }),
-              'EX',
-              3600
-            );
+            var token: string = createJWTToken({ name: user.name, email });
+            insertRedis(redisClient, token, { name: user.name, email });
             res.append(
               'Set-Cookie',
               `ut=${token}; Path=/; expires=${new Date(

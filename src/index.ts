@@ -1,6 +1,7 @@
 /** Graphql Server */
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 
 /** redis */
@@ -18,6 +19,7 @@ import { resolvers } from './graphql/resolvers';
 import { createMongoConnection } from './modules/mongodb';
 
 /** Restful API */
+import UserCheck from './restful/models/UserCheck';
 import RegisterRouter from './restful/models/Register/';
 import LoginRouter from './restful/models/Login';
 
@@ -33,13 +35,17 @@ const redisClient = createRedisClient();
 const app = express();
 const routers = express.Router();
 
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(
-  '/api',
   cors({
     origin: 'http://localhost:3000',
     credentials: true
-  }),
+  })
+);
+app.use(
+  '/api',
+  UserCheck(routers, redisClient),
   RegisterRouter(routers),
   LoginRouter(routers, redisClient)
 );

@@ -6,3 +6,8 @@
 - http only
 - redis cache
 - credential
+
+## 如何保持登入狀態
+
+- server side data
+- 從 cookie 中取得用戶資訊
